@@ -4,6 +4,6 @@ updates:
     directory: "/"  # Location of the `package.json` file
     schedule:
       interval: "daily"  # Schedule updates daily
-      time: "00:40"  # Set the specific time in UTC (24-hour format)
+      time: "00:45"  # Set the specific time in UTC (24-hour format)
     commit-message:
       prefix: "deps"  # Custom prefix for commit messages
