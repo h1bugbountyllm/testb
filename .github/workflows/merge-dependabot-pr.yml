@@ -1,27 +1,23 @@
-name: Auto Merge Dependabot PRs
+name: Dependabot auto-approve
+on: pull_request_target
 
-on:
-  pull_request:
-    types: [opened, synchronize]
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-  auto-merge:
+  dependabot:
     runs-on: ubuntu-latest
-
-    if: github.actor == 'dependabot[bot]'  # Only run if the PR is created by Dependabot
-
+    if: ${{ github.actor == 'dependabot[bot]' || github.actor == 'renovate[bot]' }}
     steps:
-      - name: Checkout repository at the PR commit
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}  # Checkout the exact commit from the PR
-
-      - name: Set up GitHub CLI
-        run: |
-          sudo apt-get install -y gh
-          gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: Auto-merge Dependabot PR with rebase
-        run: gh pr merge ${{ github.event.pull_request.number }} --auto --rebase
+      - name: Approve a PR
+        run: gh pr review --approve "$PR_URL"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.TRPC_GITHUB_TOKEN}}
+
+      - name: Enable auto-merge for Dependabot PRs
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.TRPC_GITHUB_TOKEN}}
